@@ -59,6 +59,7 @@
 #include "../wiringPiD/drcNetCmd.h"
 #include "pseudoPins.h"
 #include "bmp180.h"
+#include "bmp280.h"
 #include "htu21d.h"
 #include "ds18b20.h"
 #include "rht03.h"
@@ -481,6 +482,70 @@ static int doExtensionPseudoPins (UNU char *progName, int pinBase, UNU char *par
 static int doExtensionBmp180 (UNU char *progName, int pinBase, UNU char *params)
 {
   bmp180Setup (pinBase) ;
+  return TRUE ;
+}
+
+/*
+ * doExtensionBmp280:
+ *	Analog Temp + Pressure
+ *	bmp280:base:bus:port 
+ * example :
+ *  gpio -x bmp280:64:i2c aread 64 
+ *  gpio -x bmp280:64:spi:0 aread 64 
+ *********************************************************************************
+ */
+
+static char *getParam(char **pBuf) 
+{
+  int  i=0;
+  char *pParam = *pBuf;
+  
+  if (*pParam==0) return 0;
+  while (1)
+  {
+    if (*(pParam+i)==':')
+    {
+      *(pParam+i) = 0;
+      *pBuf = pParam+i+1;
+      break;
+    }
+    else
+    if (*(pParam+i)==0)
+    {
+      *pBuf = pParam+i;
+      break;
+    }
+    i++;
+  }
+  return pParam;
+}
+
+static int doExtensionBmp280 (UNU char *progName, int pinBase, UNU char *params)
+{
+  char *pParams = params;
+  char *pstr, bus[1024];
+  int port=0;
+  int index = 0;
+  pParams++;
+  
+  while (1) {
+    pstr = getParam(&pParams);
+    if (pstr==0) break;
+
+    if (index==0) strcpy(bus, pstr);
+    else
+    if (index==1) port = atoi(pstr);
+    index++;
+  }
+  
+  if (strcmp(bus,"i2c")==0) {
+    bmp280i2cSetup (pinBase) ;
+  }
+  else
+  if (strcmp(bus,"spi")==0) {
+    bmp280spiSetup (pinBase, port) ;
+  }
+  else verbError ("%s: bus %s donesn't soupported", progName, bus) ;
 
   return TRUE ;
 }
@@ -840,6 +905,7 @@ static struct extensionFunctionStruct extensionFunctions [] =
   { "pcf8574",		&doExtensionPcf8574	},
   { "pcf8591",		&doExtensionPcf8591	},
   { "bmp180",		&doExtensionBmp180	},
+  { "bmp280",		&doExtensionBmp280	},
   { "pseudoPins",	&doExtensionPseudoPins	},
   { "htu21d",		&doExtensionHtu21d	},
   { "ds18b20",		&doExtensionDs18b20	},

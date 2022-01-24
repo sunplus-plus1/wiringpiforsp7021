@@ -44,12 +44,11 @@
 
 // What BCM_GPIO input are we using?
 
-#define	BUTTON_PIN	17
+#define	BUTTON_PIN	0
 
 // Debounce time in mS
 
 #define	DEBOUNCE_TIME	100
-
 
 // globalCounter:
 //	Global variable to count interrupts
@@ -77,26 +76,21 @@ PI_THREAD (waitForIt)
   {
     if (waitForInterrupt (BUTTON_PIN, -1) > 0)	// Got it
     {
-// Bouncing?
+      // Bouncing?
 
       if (millis () < debounceTime)
       {
-	debounceTime = millis () + DEBOUNCE_TIME ;
-	continue ;
+        debounceTime = millis () + DEBOUNCE_TIME ;
+        continue ;
       }
 
-// We have a valid one
+      // We have a valid one
 
       state ^= 1 ;
 
       piLock (COUNT_KEY) ;
-	++globalCounter ;
+        ++globalCounter ;
       piUnlock (COUNT_KEY) ;
-
-// Wait for key to be released
-
-      while (digitalRead (BUTTON_PIN) == LOW)
-	delay (1) ;
 
       debounceTime = millis () + DEBOUNCE_TIME ;
     }
@@ -113,14 +107,9 @@ PI_THREAD (waitForIt)
 void setup (void)
 {
 
-// Use the gpio program to initialise the hardware
-//	(This is the crude, but effective)
-
-  system ("gpio edge 17 falling") ;
-
 // Setup wiringPi
 
-  wiringPiSetupSys () ;
+  wiringPiSetup () ;
 
 // Fire off our interrupt handler
 
@@ -148,7 +137,7 @@ int main (void)
     while (myCounter == lastCounter)
     {
       piLock (COUNT_KEY) ;
-	myCounter = globalCounter ;
+      myCounter = globalCounter ;
       piUnlock (COUNT_KEY) ;
       delay (500) ;
     }

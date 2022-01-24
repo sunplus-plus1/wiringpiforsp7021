@@ -72,15 +72,27 @@ fi
 
 if [ x$1 = "xuninstall" ]; then
   cd wiringPi
-  echo -n "wiringPi: " ; $sudo make uninstall
+  echo -n "wiringPi: " ; #$sudo make uninstall
   cd ../devLib
-  echo -n "DevLib:   " ; $sudo make uninstall
+  echo -n "DevLib:   " ; #$sudo make uninstall
   cd ../gpio
-  echo -n "gpio:     " ; $sudo make uninstall
+  echo -n "gpio:     " ; #$sudo make uninstall
   exit
 fi
 
 # Only if you know what you're doing!
+
+CROSS=
+
+if [ "${PLATFORM}" = "Q645" ]; then
+    ARCH="-march=armv8-a -fno-delete-null-pointer-checks -ffunction-sections -fdata-sections -Wno-unused-function"
+    # CROSS=/home/jackys/SP7021/crossgcc/gcc-arm-9.2-2019.12-x86_64-aarch64-none-linux-gnu/bin/aarch64-none-linux-gnu-
+else
+    # CROSS=/home/jackys/SP7021/crossgcc/arm-linux-gnueabihf/bin/arm-linux-gnueabihf-
+    ARCH="-mcpu=cortex-a7 -mfloat-abi=hard -mfpu=vfpv4"
+fi
+
+CC=${CROSS}gcc
 
 if [ x$1 = "xdebian" ]; then
   here=`pwd`
@@ -88,14 +100,16 @@ if [ x$1 = "xdebian" ]; then
   cd debian-template/wiringPi
   rm -rf usr
   cd $here/wiringPi
-  make install-deb DEB_DESTDIR=${deb_destdir}
+  make install-deb CC=${CC} DEB_DESTDIR=${deb_destdir} 
   cd $here/devLib
-  make install-deb INCLUDE='-I. -I../wiringPi' DEB_DESTDIR=${deb_destdir}
+  make install-deb CC=${CC} INCLUDE='-I. -I../wiringPi' DEB_DESTDIR=${deb_destdir}
   cd $here/gpio
-  make install-deb INCLUDE='-I../wiringPi -I../devLib' LDFLAGS=-L../debian-template/wiringPi/usr/lib DEB_DESTDIR=${deb_destdir}
+  make install-deb CC=${CC} INCLUDE='-I../wiringPi -I../devLib' LDFLAGS=-L../debian-template/wiringPi/usr/lib DEB_DESTDIR=${deb_destdir}
   cd $here/debian-template
   fakeroot dpkg-deb --build wiringPi
   mv wiringPi.deb  wiringpi-`cat $here/VERSION`-1.deb
+  cd $here/examples
+  make CC=${CC} really-all INCLUDE='-I../wiringPi -I../devLib' LDFLAGS=-L../debian-template/wiringPi/usr/lib 
   exit
 fi
 
@@ -129,30 +143,30 @@ fi
   echo
   echo "WiringPi Library"
   cd wiringPi
-  $sudo make uninstall
+  #$sudo make uninstall
   if [ x$1 = "xstatic" ]; then
     make -j5 static
     check_make_ok
-    $sudo make install-static
+    #$sudo make install-static
   else
     make -j5
     check_make_ok
-    $sudo make install
+    #$sudo make install
   fi
   check_make_ok
 
   echo
   echo "WiringPi Devices Library"
   cd ../devLib
-  $sudo make uninstall
+  #$sudo make uninstall
   if [ x$1 = "xstatic" ]; then
     make -j5 static
     check_make_ok
-    $sudo make install-static
+    #$sudo make install-static
   else
     make -j5
     check_make_ok
-    $sudo make install
+    #$sudo make install
   fi
   check_make_ok
 
@@ -161,7 +175,7 @@ fi
   cd ../gpio
   make -j5
   check_make_ok
-  $sudo make install
+  #$sudo make install
   check_make_ok
 
 # echo
@@ -169,7 +183,7 @@ fi
 # cd ../wiringPiD
 # make -j5
 # check_make_ok
-# $sudo make install
+# #$sudo make install
 # check_make_ok
 
 # echo

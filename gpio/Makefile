@@ -33,7 +33,7 @@ endif
 #DEBUG	= -g -O0
 DEBUG	= -O2
 CC	?= gcc
-INCLUDE	= -I$(DESTDIR)$(PREFIX)/include
+INCLUDE	= -I$(DESTDIR)$(PREFIX)/include -I../wiringPi -I../devLib
 CFLAGS	= $(DEBUG) -Wall -Wextra $(INCLUDE) -Winline -pipe $(EXTRA_CFLAGS)
 
 LDFLAGS	= -L$(DESTDIR)$(PREFIX)/lib

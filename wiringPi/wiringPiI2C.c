@@ -110,7 +110,6 @@ static inline int i2c_smbus_access (int fd, char rw, uint8_t command, int size, 
   return ioctl (fd, I2C_SMBUS, &args) ;
 }
 
-
 /*
  * wiringPiI2CRead:
  *	Simple device read
@@ -224,7 +223,7 @@ int wiringPiI2CSetup (const int devId)
 
   rev = piGpioLayout () ;
 
-  if (rev == 1)
+  if (rev == SP_LAYOUT_F2S)
     device = "/dev/i2c-0" ;
   else
     device = "/dev/i2c-1" ;

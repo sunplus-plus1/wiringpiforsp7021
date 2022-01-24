@@ -48,7 +48,9 @@ SRC	=	blink.c blink8.c blink12.c					\
 		delayTest.c serialRead.c serialTest.c okLed.c ds1302.c		\
 		lowPower.c							\
 		max31855.c							\
-		rht03.c
+		rht03.c								\
+		serialRWTest.c						\
+		bcm280test.c
 
 OBJ	=	$(SRC:.c=.o)
 
